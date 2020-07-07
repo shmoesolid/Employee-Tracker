@@ -1,0 +1,28 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "Tracks employees via command line MySQL database",
+  "main": "server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shmoesolid/Employee-Tracker.git"
+  },
+  "author": "Shane Koehler",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/shmoesolid/Employee-Tracker/issues"
+  },
+  "homepage": "https://github.com/shmoesolid/Employee-Tracker#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "mysql": "^2.18.1",
+    "util": "^0.12.3"
+  }
+}
