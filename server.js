@@ -25,8 +25,19 @@ const db = new UDB("root", "HERRO_PASSWORD", "employee_db");
 //     .then( rows => console.table(rows) );
 
 db
+.insert('employee', {first_name: "Shane", last_name: "Brosif"})
+.then(
+    db
     .fetch('employee', ['*'], null, null, [10,0])
-    .then( rows => console.table(rows) );
+    .then( rows => 
+        {
+            console.table(rows);
+            db.close();
+        }
+    )
+);
+
+
 
 //db.parseForParams('SELECT  *  FROM blah WHERE x = 1;');
 
