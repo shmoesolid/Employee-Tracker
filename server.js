@@ -16,8 +16,16 @@ const db = new UDB("root", "HERRO_PASSWORD", "employee_db");
 //         ]
 //     ).then( rows => console.table(rows) );
 
+// db
+//     .fetch('employee', ['*'], {id: 1}, ['='], null, 'last_name')
+//     .then( rows => console.table(rows) );
+
+// db
+//     .fetch('employee', ['*'])
+//     .then( rows => console.table(rows) );
+
 db
-    .fetch('employee', ['*'], {last_name: "blow"}, ['='])
+    .fetch('employee', ['*'], null, null, [10,0])
     .then( rows => console.table(rows) );
 
 //db.parseForParams('SELECT  *  FROM blah WHERE x = 1;');
