@@ -24,18 +24,44 @@ const db = new UDB("root", "HERRO_PASSWORD", "employee_db");
 //     .fetch('employee', ['*'])
 //     .then( rows => console.table(rows) );
 
-db
-.insert('employee', {first_name: "Shane", last_name: "Brosif"})
-.then(
-    db
-    .fetch('employee', ['*'], null, null, [10,0])
-    .then( rows => 
-        {
-            console.table(rows);
-            db.close();
-        }
-    )
-);
+// db
+// .insert('employee', {first_name: "Shane", last_name: "Brosif"})
+// .then(
+//     db
+//     .fetch('employee', ['*'], null, null, [10,0])
+//     .then( rows => 
+//         {
+//             console.table(rows);
+//             db.close();
+//         }
+//     )
+// );
+
+// db
+// .delete('employee', {id: 2}, ['='])
+// .then(
+//     db
+//     .fetch('employee', ['*'], null, null, [10,0])
+//     .then( rows => 
+//         {
+//             console.table(rows);
+//             db.close();
+//         }
+//     )
+// );
+
+// db
+// .update('employee', {first_name: 'Chaine'}, {id: 3}, ['='])
+// .then(
+//     db
+//     .fetch('employee', ['*'], null, null, [10,0])
+//     .then( rows => 
+//         {
+//             console.table(rows);
+//             db.close();
+//         }
+//     )
+// );
 
 
 
