@@ -4,11 +4,6 @@ const UDB = require("./lib/udb");
 
 const db = new UDB("root", "HERRO_PASSWORD", "employee_db");
 
-// db.test().then( 
-//     rows => console.table(rows)
-// );
-
-
 // db
 //     .queryRaw('SELECT ?? FROM ?? WHERE first_name = ?',
 //         [
@@ -16,9 +11,9 @@ const db = new UDB("root", "HERRO_PASSWORD", "employee_db");
 //         ]
 //     ).then( rows => console.table(rows) );
 
-// db
-//     .fetch('employee', ['*'], {id: 1}, ['='], null, 'last_name')
-//     .then( rows => console.table(rows) );
+db
+    .fetch('employee', ['*'], {id: 1}, ['='], null, 'last_name')
+    .then( rows => console.table(rows) );
 
 // db
 //     .fetch('employee', ['*'])
@@ -62,8 +57,4 @@ const db = new UDB("root", "HERRO_PASSWORD", "employee_db");
 //         }
 //     )
 // );
-
-
-
-//db.parseForParams('SELECT  *  FROM blah WHERE x = 1;');
 
