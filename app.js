@@ -45,6 +45,36 @@ var mainList =
             Menu.list(deptList);
         }
     },
+    /*{ ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "View all employees by manager",
+        execute() {
+            db_emp.fetchAllManagers((res) => this.execute_cb(res) );
+        },
+        execute_cb(res) {
+            // build list
+            var list = [];
+
+            res.forEach( manager => {
+                list.push( 
+                    {
+                        msg: manager.first_name +" "+ manager.last_name,
+                        execute() { 
+                            db_emp.fetchAllEmployeesByManagerID(manager.id,
+                                (res) => this.execute_cb(res)
+                            );
+                        },
+                        execute_cb(res) {
+                            console.table(res); 
+                            Menu.list(mainList); 
+                        }
+                    }
+                );
+            });
+
+            // show dept select list
+            Menu.list(list);
+        }
+    },*/
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Add employee",
         execute() { 

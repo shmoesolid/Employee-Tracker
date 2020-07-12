@@ -37,7 +37,12 @@ var db_emp =
         this.fetchAllEmployees( {'d.name':whichDept}, function(res) { cb(res) } );
     },
 
-    fetchAllManagers: function(cb=null)
+    fetchAllEmployeesByManagerID: function(id, cb=null)
+    {
+        this.fetchAllEmployees( {'e2.id':id}, function(res) { cb(res) } );
+    },
+
+    fetchAllManagers: function(cb=null) // FIXME too tired
     {
         db
         .queryRaw('SELECT DISTINCT * FROM employee WHERE manager_id != ?', ['null'])
