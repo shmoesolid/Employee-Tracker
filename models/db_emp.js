@@ -54,7 +54,7 @@ var db_emp =
     fetchAllDepts: function(cb=null)
     {
         db
-        .fetch('department', ['name'])
+        .fetch('department', ['*'])
         .then( function(res) { if (cb!=null) cb(res) });
     },
 
@@ -76,6 +76,13 @@ var db_emp =
     {
         db
         .delete('employee', {id: id}, ["="])
+        .then( function(res) { if (cb!=null) cb(res) });
+    },
+
+    addRole: function(name, num, deptid, cb=null)
+    {
+        db
+        .insert('role', {title: name, salary: num, department_id: deptid})
         .then( function(res) { if (cb!=null) cb(res) });
     },
 

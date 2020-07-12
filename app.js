@@ -3,6 +3,7 @@ const contable = require('console.table');
 
 const Menu = require('./lib/menu');
 const db_emp = require('./models/db_emp');
+const db = require('./config/connection');
 
 var mainList =
 [
@@ -87,21 +88,16 @@ var mainList =
                                                     execute() {
                                                         db_emp.updateEmployee(
                                                             empID, 
-                                                            {manager_id: manager.id},
-                                                            (res) => this.execute_cb(res)
+                                                            {manager_id: manager.id}
                                                         );
-                                                    },
-                                                    execute_cb(res) {
-                                                        console.table(res); 
                                                         Menu.list(mainList); 
-                                                    }
+                                                    }// no need for callback
                                                 }
                                             );
                                         });
 
-                                        // add no option
+                                        // add no option and show list
                                         managerList.push({ msg: "None", execute() { Menu.list(mainList) } });
-
                                         Menu.list(managerList);
                                     })
                                 }
@@ -109,10 +105,8 @@ var mainList =
                         );
                     });
 
-                    // add no option
+                    // add no option and show list
                     roleList.push({ msg: "None", execute() { Menu.list(mainList) } });
-
-                    // show rolelist selection
                     Menu.list(roleList);
                 });
             }); 
@@ -122,67 +116,170 @@ var mainList =
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Remove employee", 
         execute() {
-            db_emp.fetchAllEmployees(null, res => {
-                var list = [];
-
-                res.forEach( employee => {
-                    list.push(
-                        {
-                            msg: employee.first_name +" "+ employee.last_name,
-                            execute() {
-                                db_emp.removeEmployee(employee.id);
-                                console.table(res); 
-                                Menu.list(mainList); 
-                            }
-                        }
-                    );
-                });
-
-                // add no option
-                list.push({ msg: "Nevermind, I love all my employees", execute() { Menu.list(mainList) } });
-
-                // show list
-                Menu.list(list);
-            }
-        )},
+            db_emp.fetchAllEmployees(null, (res) => this.execute_cb(res))
+        },
         execute_cb(res) {
-            
+            var list = [];
+
+            res.forEach( employee => {
+                list.push(
+                    {
+                        msg: employee.first_name +" "+ employee.last_name,
+                        execute() {
+                            db_emp.removeEmployee(employee.id);
+                            console.table(res); 
+                            Menu.list(mainList); 
+                        } // no need for callback
+                    }
+                );
+            });
+
+            // add no option and show list
+            list.push({ msg: "Nevermind, I love all my employees", execute() { Menu.list(mainList) } });
+            Menu.list(list);
         }
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Update employee role", 
-        execute() {  
-
+        execute() {
+            db_emp.fetchAllEmployees( null, (res) => this.execute_cb(res) );
         },
         execute_cb(res) {
+            var empID = null;
+
+            // build employee list to select
+            var empList = [];
+            res.forEach( employee => {
+                empList.push(
+                    {
+                        msg: employee.first_name + " " + employee.last_name,
+                        execute() {
+                            empID = employee.id; // update higher up var
+
+                            db_emp.fetchAllRoles( (res) => this.execute_cb(res) );
+                        },
+                        execute_cb(res) {
+                            // build list with roles to select
+                            var roleList = [];
+                
+                            res.forEach( role => {
+                                roleList.push( 
+                                    {
+                                        msg: role.title,
+                                        execute() { 
+                                            db_emp.updateEmployee(empID, {role_id: role.id})
+                                            Menu.list(mainList);
+                                        } // no need for callback
+                                    }
+                                )
+                            });
             
+                            // add no option and show list
+                            roleList.push({ msg: "Nevermind", execute() { Menu.list(mainList) } });
+                            Menu.list(roleList);
+                        }
+                    }
+                );
+            });
+
+            // add no option and show list
+            empList.push({ msg: "Nevermind", execute() { Menu.list(mainList) } });
+            Menu.list(empList);
         } 
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Update employee manager", 
-        execute() {  
-
+        execute() {
+            db_emp.fetchAllEmployees( null, (res) => this.execute_cb(res) );
         },
         execute_cb(res) {
+            var empID = null;
+
+            // build employee list to select
+            var empList = [];
+            res.forEach( employee => {
+                empList.push(
+                    {
+                        msg: employee.first_name + " " + employee.last_name,
+                        execute() {
+                            empID = employee.id; // update higher up var
+
+                            db_emp.fetchAllEmployees( null, (res) => this.execute_cb(res) );
+                        },
+                        execute_cb(res) {
+                            // build list with roles to select
+                            var manList = [];
+                
+                            res.forEach( man => {
+                                manList.push( 
+                                    {
+                                        msg: man.first_name + " " + man.last_name,
+                                        execute() { 
+                                            db_emp.updateEmployee(empID, {manager_id: man.id})
+                                            Menu.list(mainList);
+                                        } // no need for callback
+                                    }
+                                )
+                            });
             
-        }
+                            // add no option and show list
+                            manList.push({ msg: "Nevermind", execute() { Menu.list(mainList) } });
+                            Menu.list(manList, "Select employee's new manager:");
+                        }
+                    }
+                );
+            });
+
+            // add no option and show list
+            empList.push({ msg: "Nevermind", execute() { Menu.list(mainList) } });
+            Menu.list(empList, "Select employee to change:");
+        } 
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "View all roles", 
         execute() {  
-
+            db_emp.fetchAllRoles( (res) => this.execute_cb(res) );
         },
         execute_cb(res) {
-            
+            console.table(res);
+            Menu.list(mainList);
         }
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Add role", 
         execute() {  
-
+            Menu.input( 
+                [
+                    { name: "name", message: "Enter new role name:" },
+                    { name: "salary", message: "Enter role's salary:" }
+                ], 
+                (res) => this.execute_cb(res));
         },
         execute_cb(res) {
             
+            var addName = res.name;
+            var addSalary = res.salary;
+
+            db_emp.fetchAllDepts( res => {
+                // build list
+                var deptList = [];
+                    
+                res.forEach( dept => {
+                    deptList.push( 
+                        {
+                            msg: dept.name,
+                            execute() { 
+                                db_emp.addRole(addName, addSalary, dept.id);
+                                Menu.list(mainList);
+                            }
+                        }
+                    )
+                });
+
+                // add no option and show list
+                deptList.push({ msg: "Nevermind", execute() { Menu.list(mainList) } });
+                Menu.list(deptList, "Select role's department:");
+            });
         }
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,6 +289,16 @@ var mainList =
         },
         execute_cb(res) {
             
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "View all departments", 
+        execute() {  
+            db_emp.fetchAllDepts( (res) => this.execute_cb(res) );
+        },
+        execute_cb(res) {
+            console.table(res);
+            Menu.list(mainList);
         }
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
