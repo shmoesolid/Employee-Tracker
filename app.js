@@ -285,10 +285,27 @@ var mainList =
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Remove role", 
         execute() {  
-
+            db_emp.fetchAllRoles( (res) => this.execute_cb(res) );
         },
         execute_cb(res) {
-            
+            // build list with roles to select
+            var roleList = [];
+                
+            res.forEach( role => {
+                roleList.push( 
+                    {
+                        msg: role.title,
+                        execute() { 
+                            db_emp.removeRole(role.id);
+                            Menu.list(mainList);
+                        } // no need for callback
+                    }
+                )
+            });
+
+            // add no option and show list
+            roleList.push({ msg: "Nevermind", execute() { Menu.list(mainList) } });
+            Menu.list(roleList);
         }
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,19 +321,41 @@ var mainList =
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Add department", 
         execute() {  
-
+            Menu.input( 
+                [
+                    { name: "name", message: "Enter new department name:" }
+                ], 
+                (res) => this.execute_cb(res));
         },
         execute_cb(res) {
-            
+            db_emp.addDepartment(res.name);
+            Menu.list(mainList);
         }
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
         msg: "Remove department",
         execute() {  
-
+            db_emp.fetchAllDepts( (res) => this.execute_cb(res) );
         },
         execute_cb(res) {
+            // build list with roles to select
+            var deptList = [];
             
+            res.forEach( dept => {
+                deptList.push( 
+                    {
+                        msg: dept.name,
+                        execute() { 
+                            db_emp.removeDepartment(dept.id);
+                            Menu.list(mainList);
+                        } // no need for callback
+                    }
+                )
+            });
+
+            // add no option and show list
+            deptList.push({ msg: "Nevermind", execute() { Menu.list(mainList) } });
+            Menu.list(deptList);
         }
     },
     { ///////////////////////////////////////////////////////////////////////////////////////////////////////////

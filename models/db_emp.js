@@ -86,6 +86,27 @@ var db_emp =
         .then( function(res) { if (cb!=null) cb(res) });
     },
 
+    removeRole: function(id, cb=null)
+    {
+        db
+        .delete('role', {id: id}, ['='])
+        .then( function(res) { if (cb!=null) cb(res) });
+    },
+
+    addDepartment: function(name, cb=null)
+    {
+        db
+        .insert('department', {name: name})
+        .then( function(res) { if (cb!=null) cb(res) });
+    },
+
+    removeDepartment: function(id, cb=null)
+    {
+        db
+        .delete('department', {id: id}, ['='])
+        .then( function(res) { if (cb!=null) cb(res) });
+    },
+
     close: function()
     {
         db.close();
