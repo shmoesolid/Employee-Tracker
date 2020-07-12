@@ -3,7 +3,6 @@ const contable = require('console.table');
 
 const Menu = require('./lib/menu');
 const db_emp = require('./models/db_emp');
-const db = require('./config/connection');
 
 var mainList =
 [
