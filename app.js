@@ -1,99 +1,228 @@
 
-const inquirer = require('inquirer');
 const contable = require('console.table');
-const UDB = require("./lib/udb");
 
-const db = new UDB("root", "HERRO_PASSWORD", "employee_db");
+const Menu = require('./lib/menu');
+const db_emp = require('./models/db_emp');
 
-console.log("================================\n\n");
+var mainList =
+[
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "View all employees", 
+        execute() { 
+            db_emp.fetchAllEmployees( null, (res) => this.execute_cb(res) ) ;
+        },
+        execute_cb(res) {
+            console.table(res); 
+            Menu.list(mainList); 
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "View all employees by department",
+        execute() {
+            db_emp.fetchAllDepts((res) => this.execute_cb(res) );
+        },
+        execute_cb(res) {
+            // build list with depts to select
+            var deptList = [];
 
-var mainMenuChoices = Object.freeze(
-	{
-		viewEmp: "View all employees", // presetMethod()] // maybe this??
-  		addEmp: "Add a new employee",
-  		updateEmp: "Edit an employee",
-  		deleteEmp: "Delete an employee",
-		exit: "Exit",
-	}
-  	/*
-    [
-    	{ msg: "View all employees", execute: () => { db.fetch(); } },
-        { msg: "Add a new employee", execute: () => { submenuBlah() } }
-    ]
-    */
-);
+            res.forEach( dept => {
+                deptList.push( 
+                    {
+                        msg: dept.name,
+                        execute() { 
+                            db_emp.fetchAllEmployeesByDeptName(dept.name, (res) => this.execute_cb(res)) 
+                        },
+                        execute_cb(res) {
+                            console.table(res); 
+                            Menu.list(mainList); 
+                        }
+                    }
+                );
+            });
 
-var mainMenu = () =>
-{
-    inquirer
-        .prompt(
-            {
-                name: "something",
-                type: "list",
-                message: "message: ",
-                choices: Object.values(mainMenuChoices)
+            // show dept select list
+            Menu.list(deptList);
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Add employee",
+        execute() { 
+            Menu.input(
+                [
+                    {
+                        name: "first",
+                        msg: "Employee first name:",
+                    },
+                    {
+                        name: "last",
+                        msg: "Employee last name:",
+                    }
+                ]
+            , (res) => this.execute_cb(res));
+        },
+        execute_cb(res) {
+            db_emp.addEmployee(res.first, res.last, (res) => {
+                var empID = res.insertId;
+
+                db_emp.fetchAllRoles( (res) => {
+                    // build list with roles to select
+                    var roleList = [];
+
+                    res.forEach( role => {
+                        roleList.push( 
+                            {
+                                msg: role.title,
+                                execute() { 
+                                    console.log(empID, role.id);
+                                    db_emp.updateEmployee(empID, {role_id: role.id}, (res) => this.execute_cb(res))
+                                },
+                                execute_cb(res) {
+                                    db_emp.fetchAllEmployees(null, res => {
+                                        var managerList = [];
+
+                                        res.forEach( manager => {
+                                            managerList.push(
+                                                {
+                                                    msg: manager.first_name +" "+ manager.last_name,
+                                                    execute() {
+                                                        db_emp.updateEmployee(
+                                                            empID, 
+                                                            {manager_id: manager.id},
+                                                            (res) => this.execute_cb(res)
+                                                        );
+                                                    },
+                                                    execute_cb(res) {
+                                                        console.table(res); 
+                                                        Menu.list(mainList); 
+                                                    }
+                                                }
+                                            );
+                                        });
+
+                                        // add no option
+                                        managerList.push({ msg: "None", execute() { Menu.list(mainList) } });
+
+                                        Menu.list(managerList);
+                                    })
+                                }
+                            }
+                        );
+                    });
+
+                    // add no option
+                    roleList.push({ msg: "None", execute() { Menu.list(mainList) } });
+
+                    // show rolelist selection
+                    Menu.list(roleList);
+                });
+            }); 
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Remove employee", 
+        execute() {
+            db_emp.fetchAllEmployees(null, res => {
+                var list = [];
+
+                res.forEach( employee => {
+                    list.push(
+                        {
+                            msg: employee.first_name +" "+ employee.last_name,
+                            execute() {
+                                db_emp.removeEmployee(employee.id);
+                                console.table(res); 
+                                Menu.list(mainList); 
+                            }
+                        }
+                    );
+                });
+
+                // add no option
+                list.push({ msg: "Nevermind, I love all my employees", execute() { Menu.list(mainList) } });
+
+                // show list
+                Menu.list(list);
             }
-        ).then( answer =>
-            // ..
-            // anwser.something
-            switch (answer.something)
-  			{
-            	case mainMenuChoices.viewEmp:
-              		// execute query or run sub menu
-            }
-        );
-};
+        )},
+        execute_cb(res) {
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Update employee role", 
+        execute() {  
 
-// db
-//     .queryRaw('SELECT ?? FROM ?? WHERE first_name = ?',
-//         [
-//             "*", "employee", "name"
-//         ]
-//     ).then( rows => console.table(rows) );
+        },
+        execute_cb(res) {
+            
+        } 
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Update employee manager", 
+        execute() {  
 
-// db
-//     .fetch('employee', ['*'], {id: 1}, ['='], null, 'last_name')
-//     .then( rows => console.table(rows) );
+        },
+        execute_cb(res) {
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "View all roles", 
+        execute() {  
 
-// db
-//     .fetch('employee', ['*'])
-//     .then( rows => console.table(rows) );
+        },
+        execute_cb(res) {
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Add role", 
+        execute() {  
 
-// db
-// .insert('employee', {first_name: "Shane", last_name: "Brosif"})
-// .then(
-//     db
-//     .fetch('employee', ['*'], null, null, [10,0])
-//     .then( rows =>
-//         {
-//             console.table(rows);
-//             db.close();
-//         }
-//     )
-// );
+        },
+        execute_cb(res) {
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Remove role", 
+        execute() {  
 
-// db
-// .delete('employee', {id: 2}, ['='])
-// .then(
-//     db
-//     .fetch('employee', ['*'], null, null, [10,0])
-//     .then( rows =>
-//         {
-//             console.table(rows);
-//             db.close();
-//         }
-//     )
-// );
+        },
+        execute_cb(res) {
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Add department", 
+        execute() {  
 
-// db
-// .update('employee', {first_name: 'Chaine'}, {id: 3}, ['='])
-// .then(
-//     db
-//     .fetch('employee', ['*'], null, null, [10,0])
-//     .then( rows =>
-//         {
-//             console.table(rows);
-//             db.close();
-//         }
-//     )
-// );
+        },
+        execute_cb(res) {
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Remove department",
+        execute() {  
+
+        },
+        execute_cb(res) {
+            
+        }
+    },
+    { ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        msg: "Exit",
+        execute() {  
+            db_emp.close(); 
+            process.exit();
+        }
+    }
+];
+
+console.log("\n",
+    "================================\n",
+    "= Employee Tracker...\n",
+    "================================\n");
+Menu.list(mainList);
